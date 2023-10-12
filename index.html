@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <title>Pentyrch Rangers Fines</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <section id="logged-out-view">
+        <div class="container">
+
+            <h1 class="app-title">Pentyrch Rangers Senior Team Fines</h1>
+            
+            <div class="auth-fields-and-buttons">
+                <input id="email-input" type="email" placeholder="Email">
+                <input id="password-input" type="password" placeholder="Password">
+                
+                <button id="sign-in-btn" class="primary-btn">Sign in</button>
+                <button id="create-account-btn" class="secondary-btn">Create Account</button>
+            </div>
+
+            <div class="provider-buttons">
+                <button id="sign-in-with-google-btn" class="provider-btn">
+                    <img src="images/google.png" class="google-btn-logo">
+                    Sign in with Google
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="logged-in-view">
+        <div class="container">
+            <nav id="logged-in-nav">
+                <button id="add-player-view-btn" class="icon-btn">
+                    <img src="images/add.svg" class="icon-img-btn">
+                </button>
+                <button id="sign-out-btn" class="icon-btn">
+                    <img src="images/logout.svg" class="icon-img-btn">
+                </button>
+            </nav>
+
+            <ul id="players"></ul>
+        </div>
+    </section>
+
+    <section id="add-player-view">
+        <div class="container">
+            <div class="add-players">
+                <input id="firstname-input" type="text" placeholder="First name:">
+                <input id="lastname-input" type="text" placeholder="Last name:">
+                <div class="submit-btns">
+                    <button id="add-player-btn" class="submit-btn">Add</button>
+                    <button id="cancel-player-btn" class="submit-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="current-player-view">
+        <div class="container">
+            <nav>
+                <button id="back-btn" class="icon-btn">
+                    <img src="images/back-arrow.svg" class="icon-img-btn">
+                </button>
+            </nav>
+            
+            <div class="current-player-view">
+                <p>Enter how much you want to add or subtract...</p>
+                <input id="fine-input" type="number" placeholder="Fine:">
+                <input id="fine-reason-input" type="text" placeholder="Fine Reason:">
+                <div class="submit-btns">
+                    <button id="subtract-fine-btn" class="submit-btn">Subtract</button>
+                    <button id="add-fine-btn" class="submit-btn">Add</button>
+                </div>
+                <ul>
+                    <div class="fine-reason">
+                        <li>Dummy Club</li>
+                        <li>£1</li>
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <script src="index.js" type="module"></script>
+</body>
+</html>
