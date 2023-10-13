@@ -10,6 +10,15 @@ body{
     color: #F8F9FA;
 }
 
+.logo{
+    width: 100px;
+    height: 100px;
+}
+
+.logged-out-nav{
+    display: flex;
+}
+
 /* --Typography-- */
 
 h1{
@@ -18,7 +27,20 @@ h1{
 
 .app-title{
     text-align: center;
-    font-size: 2.5em;
+    font-size: 2em;
+    padding-top: 10px;
+    margin-right: 2px;
+}
+
+p{
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 /* --Sections-- */
@@ -33,6 +55,12 @@ section{
     gap: 1em;
 }
 
+.add-fine-inputs {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+}
+
 /* === Nav === */
 
 nav {
@@ -41,11 +69,6 @@ nav {
     display: flex;
     justify-content: space-between;
 }
-
-#add-player-nav{
-    justify-content: flex-end;
-}
-
 /* --Structure-- */
 
 .container{
@@ -77,6 +100,7 @@ input, button{
 
 input{
     font-weight: 500;
+    color: #212529;
 }
 
 input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
@@ -124,26 +148,6 @@ button:hover {
 .secondary-btn:hover{
     color: #F8F9FA;
     background-color: #212529;
-}
-
-.provider-btn{
-    color: #212529;
-    background-color: #F8F9FA;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5em;
-    border: 0;
-    box-shadow: 3px 3px 3px 1px rgba(0, 0, 0, .25);
-}
-
-.provider-btn:hover {
-    transition: all 0.2s ease;
-    box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, .25);
-}
-
-.google-btn-logo {
-    width: 1.375em;
 }
 
 .icon-btn {
@@ -194,25 +198,13 @@ button:hover {
     color: #212529;
 }
 
-
-
 /* === IDs === */
 
 #logged-out-view {
     display: flex;
 }
 
-#logged-in-view {
-    display: none;
-    margin: 0;
-}
-
-#add-player-view{
-    display: none;
-    margin: 0;
-}
-
-#current-player-view{
+#logged-in-view, #add-player-view, #current-player-view, #add-fine-to-player-view {
     display: none;
     margin: 0;
 }
@@ -249,24 +241,59 @@ li{
 }
 
 .add-players, .current-player-view{
-    margin-top: 30px;
-}
-
-.add-players input, .current-player-view input{
     margin-top: 10px;
 }
 
-.current-player-view p{
-    text-align: center;
-    margin-top: 0;
+.add-players input, .add-fine-inputs input{
+    margin-top: 10px;
 }
 
 #current-player-view .container nav{
-    justify-content: flex-start;
+    justify-content: space-between;
 }
 
 .fine-reason{
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
+    border-bottom: 2px solid #343A40;
 }
+
+/* Date field for mobile devices */
+
+input[type=date] {
+     box-sizing        : border-box;
+     outline           : 0;
+     padding-left      : .75rem;
+     display           : flex;
+     justify-content   : center;
+     position          : relative;
+     width             : 100%;
+     -moz-appearance   : textfield;
+     -webkit-appearance: none;
+ }
+
+ input[type=date]::placeholder {
+     font-family: 'Roboto';
+     font-size  : 17px;
+     font-style : normal;
+     font-weight: 400;
+ }
+
+ input[type=date]::-webkit-calendar-picker-indicator {
+     background: none;
+     bottom    : 0;
+     color     : transparent;
+     cursor    : pointer;
+     height    : auto;
+     left      : 0;
+     position  : absolute;
+     right     : 0;
+     top       : 0;
+     width     : auto;
+ }
+
+
+ input[type=date]::-webkit-datetime-edit {
+     text-align: center;
+     width     : 100%;
+ }

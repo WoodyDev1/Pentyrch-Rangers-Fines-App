@@ -1,8 +1,8 @@
 /* === Imports === */
   // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup  } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js"
-  import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js"
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js"
+  import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot, updateDoc, increment, deleteField, serverTimestamp  } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js"
   // TODO: Add SDKs for Firebase products that you want to use
   // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,7 +19,6 @@
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();  
   const db = getFirestore(app)
 /* == UI - Elements == */
 
@@ -29,10 +28,9 @@ const viewLoggedOut = document.getElementById("logged-out-view")
 const viewLoggedIn = document.getElementById("logged-in-view")
 const viewAddPlayer = document.getElementById("add-player-view")
 const viewCurrentPlayer = document.getElementById("current-player-view")
+const viewAddFinePage = document.getElementById("add-fine-to-player-view")
 
 /* == LoggedOutPage == */
-
-const signInWithGoogleButtonEl = document.getElementById("sign-in-with-google-btn")
 
 const emailInputEl = document.getElementById("email-input")
 const passwordInputEl = document.getElementById("password-input")
@@ -58,10 +56,19 @@ const lastnameInputEl = document.getElementById("lastname-input")
 /* == CurrentPlayerPage == */
 
 const backButtonEl = document.getElementById("back-btn")
+const addFinePageButtonEl = document.getElementById("add-player-fine-view-btn")
+
 const fineInputEl = document.getElementById("fine-input")
 const fineReasonEl = document.getElementById("fine-reason-input")
 const addFineEl = document.getElementById("add-fine-btn")
-const subtractFineEl = document.getElementById("subtract-fine-btn")
+const fineTeamPlayedAgainstEl = document.getElementById("fine-team-played-against")
+
+const fineReasonsEl = document.getElementById("fine-reasons")
+const fineDateEl = document.getElementById("fine-date")
+
+/* Add Fine to Player Page */
+
+const cancelFineEl = document.getElementById("cancel-fine-btn")
 
 /* = Global Constants = */
 
@@ -70,8 +77,6 @@ const collectionName = "players"
 /* == UI - Event Listeners == */
 
 // Logged Out Page
-
-signInWithGoogleButtonEl.addEventListener("click", authSignInWithGoogle)
 
 signInButtonEl.addEventListener("click", authSignInWithEmail)
 createAccountButtonEl.addEventListener("click", authCreateAccountWithEmail)
@@ -98,6 +103,16 @@ backButtonEl.addEventListener("click", function(){
     showLoggedInView()
 })
 
+addFinePageButtonEl.addEventListener("click", function(){
+    showAddFineToPlayerView()
+})
+
+// Add Fine to Player Page
+
+cancelFineEl.addEventListener("click", function(){
+    showCurrentPlayerView()
+})
+
 /* === Main Code === */
 
 onAuthStateChanged(auth, (user) => {
@@ -109,9 +124,11 @@ onAuthStateChanged(auth, (user) => {
       if (user.uid != "ny9AcswqXlTB9NyHwfrTAquoJkV2") {
         addPlayerViewEl.style.display = "none"
         loggedInNavEl.style.justifyContent = "flex-end"
+        addFinePageButtonEl.style.display = "none"
       } else {
         addPlayerViewEl.style.display = ""
         loggedInNavEl.style.justifyContent = "space-between"
+        addFinePageButtonEl.style.display = ""
       }
     } else {
       // User is signed out
@@ -122,15 +139,6 @@ onAuthStateChanged(auth, (user) => {
 /* === Functions === */
 
 /* = Functions - Firebase - Authentication = */
-
-function authSignInWithGoogle() {
-    signInWithPopup(auth, provider)
-    .then((result) => {
-        console.log("Signed in with Google")
-    }).catch((error) => {
-        console.error(error.message)
-    });
-}
 
 function authSignInWithEmail() {
     const email = emailInputEl.value 
@@ -177,15 +185,12 @@ function authSignOut() {
 
 /* = Functions - Firebase - Cloud Firestore = */
 
-async function addPlayerToDB(firstname, lastname, user) {
+async function addPlayerToDB(firstname, lastname) {
     const name = firstname + " " + lastname
 
     try {
         await setDoc(doc(db, collectionName, name), {
-            firstname: firstname,
-            lastname: lastname,
-            fine: 0,
-            createdByUID: user.uid
+            fine: 0
         })
         console.log("Document written with ID: ", name)
     } catch (error) {
@@ -193,42 +198,125 @@ async function addPlayerToDB(firstname, lastname, user) {
     }
 }
 
+function updateCurrentPlayerFine(selectedPlayerId){
+    
+    addFineEl.addEventListener("click", function(){
+        const newFine = fineInputEl.value
+        const fineReason = fineReasonEl.value
+        const fineTeamPlayedAgainst = fineTeamPlayedAgainstEl.value
+        const fineDate = fineDateEl.value
+
+        if(newFine && fineReason && fineDate && fineTeamPlayedAgainst) {
+            increaseFineInDB(selectedPlayerId, newFine, fineReason, fineDate, fineTeamPlayedAgainst)
+            fineInputEl.value = ""
+            clearInputField(fineReasonEl)
+            fineDateEl.value = ""
+            showCurrentPlayerView()
+            //showLoggedInView()
+        }
+    })
+}
+
+async function increaseFineInDB(docId, newFine, fineReason, fineDate, fineTeamPlayedAgainst) {
+    const postRef = doc(db, collectionName, docId)
+    const reason = "Increase reason - " + fineReason
+    const date = displayDate(fineDate)
+    const teamPlayed = fineTeamPlayedAgainst
+    const key = `${reason} - ${teamPlayed} - ${date}`
+
+    await updateDoc(postRef, {
+        [key]: newFine,
+        fine: increment(newFine)
+    })
+}
+
 function fetchInRealtimeAndRenderPostsFromDB() {
     onSnapshot(collection(db, collectionName), (querySnapshot) => {
         clearAll(playersEl)
 
         querySnapshot.forEach((doc) =>{
-            renderPlayer(playersEl, doc.data())
+            renderPlayer(playersEl, doc)
         })
+    })
+}
+
+function fetchInRealtimeAndRenderFineReasonsFromDB(selectedPlayerId) {
+    const postRef = doc(db, collectionName, selectedPlayerId)
+
+    onSnapshot(postRef, (doc) => {
+        clearAll(fineReasonsEl)
+        renderFineReasons(fineReasonsEl, doc)
     })
 }
 
 /* == Functions - UI Functions == */
 
-function renderPlayer(playersEl, postData) {
-    //const postData = wholeDoc.data()
-
-    const firstname = postData.firstname
-    const lastname = postData.lastname
+function renderPlayer(playersEl, wholeDoc) {
+    const postData = wholeDoc.data()
+    const postId = wholeDoc.id
+    
     const fine = postData.fine
 
-    const playerDiv = document.createElement("div")
-    playerDiv.className = "player"
+        const playerDiv = document.createElement("div")
+        playerDiv.className = "player"
 
-        const liName = document.createElement("li")
-        liName.textContent = firstname + " " + lastname
+            const liName = document.createElement("li")
+            liName.textContent = postId //firstname + " " + lastname
 
-        const liFine = document.createElement("li")
-        liFine.textContent = "£" + fine
+            const liFine = document.createElement("li")
+            liFine.textContent = "£" + fine
 
-    playerDiv.appendChild(liName)
-    playerDiv.appendChild(liFine)
+        playerDiv.appendChild(liName)
+        playerDiv.appendChild(liFine)
     playersEl.appendChild(playerDiv)
 
-    if(auth.currentUser.uid === "ny9AcswqXlTB9NyHwfrTAquoJkV2") {
-        playerDiv.addEventListener("click", function(){
-            showCurrentPlayerView()
-        })
+    playerDiv.addEventListener("click", function(){
+        showCurrentPlayerView()
+        fetchInRealtimeAndRenderFineReasonsFromDB(postId)
+        updateCurrentPlayerFine(postId)
+        fineInputEl.value = ""
+    })
+}
+
+function renderFineReasons(fineReasonsEl, wholeDoc){
+    const postData = wholeDoc.data()
+    const postId = wholeDoc.id
+
+    const reason = postData
+
+    for (let key in reason) {
+        
+        if(key.includes("reason")) {
+            // console.log(key, reason[key])
+            const fineReason = key.substr(18, 100)
+            const fine = reason[key]
+            const deleteFine = key
+        
+            const reasonDiv = document.createElement("div")
+            reasonDiv.className = "fine-reason"
+
+                const liReason = document.createElement("li")
+                liReason.textContent = fineReason
+
+                const liFine = document.createElement("li")
+                liFine.textContent = "£" + fine
+
+            reasonDiv.appendChild(liReason)
+            
+            reasonDiv.appendChild(liFine)
+        fineReasonsEl.appendChild(reasonDiv)
+
+        if(auth.currentUser.uid === "ny9AcswqXlTB9NyHwfrTAquoJkV2") {
+            reasonDiv.addEventListener("dblclick", async function(){
+                const postRef = doc(db, collectionName, postId)
+    
+                await updateDoc(postRef, {
+                    [deleteFine]: deleteField(),
+                    fine: increment(-(fine))
+                })
+            })
+        }
+        }
     }
 }
 
@@ -258,6 +346,7 @@ function showLoggedOutView() {
     hideView(viewLoggedIn)
     hideView(viewAddPlayer)
     hideView(viewCurrentPlayer)
+    hideView(viewAddFinePage)
     showView(viewLoggedOut)
 }
 
@@ -265,6 +354,7 @@ function showLoggedInView() {
     hideView(viewLoggedOut)
     hideView(viewAddPlayer)
     hideView(viewCurrentPlayer)
+    hideView(viewAddFinePage)
     showView(viewLoggedIn)
 }
 
@@ -272,6 +362,7 @@ function showAddPlayerView(){
     hideView(viewLoggedIn)
     hideView(viewLoggedOut)
     hideView(viewCurrentPlayer)
+    hideView(viewAddFinePage)
     showView(viewAddPlayer)
 }
 
@@ -279,7 +370,16 @@ function showCurrentPlayerView() {
     hideView(viewLoggedIn)
     hideView(viewLoggedOut)
     hideView(viewAddPlayer)
+    hideView(viewAddFinePage)
     showView(viewCurrentPlayer)
+}
+
+function showAddFineToPlayerView() {
+    hideView(viewLoggedIn)
+    hideView(viewLoggedOut)
+    hideView(viewAddPlayer)
+    hideView(viewCurrentPlayer)
+    showView(viewAddFinePage)
 }
 
 function showView(view) {
@@ -297,4 +397,25 @@ function clearInputField(field) {
 function clearAuthFields() {
 	clearInputField(emailInputEl)
 	clearInputField(passwordInputEl)
+}
+
+function displayDate(firebaseDate) {
+    if (!firebaseDate) {
+        return "Date processing"
+    }
+    
+    const date = new Date()
+    
+    const day = date.getDate()
+    const year = date.getFullYear()
+    
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    const month = monthNames[date.getMonth()]
+
+    let hours = date.getHours()
+    let minutes = date.getMinutes()
+    hours = hours < 10 ? "0" + hours : hours
+    minutes = minutes < 10 ? "0" + minutes : minutes
+
+    return `${day} ${month} ${year}`
 }

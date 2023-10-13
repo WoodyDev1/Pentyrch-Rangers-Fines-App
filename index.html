@@ -16,8 +16,10 @@
 <body>
     <section id="logged-out-view">
         <div class="container">
-
-            <h1 class="app-title">Pentyrch Rangers Senior Team Fines</h1>
+            <nav class="logged-out-nav">
+                <h1 class="app-title">Pentyrch Rangers Senior Team Fines</h1>
+                <img class="logo" src="images/PRFC.png">
+            </nav>
             
             <div class="auth-fields-and-buttons">
                 <input id="email-input" type="email" placeholder="Email">
@@ -27,12 +29,6 @@
                 <button id="create-account-btn" class="secondary-btn">Create Account</button>
             </div>
 
-            <div class="provider-buttons">
-                <button id="sign-in-with-google-btn" class="provider-btn">
-                    <img src="images/google.png" class="google-btn-logo">
-                    Sign in with Google
-                </button>
-            </div>
         </div>
     </section>
 
@@ -66,26 +62,36 @@
 
     <section id="current-player-view">
         <div class="container">
-            <nav>
+            <nav id="current-player-nav">
                 <button id="back-btn" class="icon-btn">
                     <img src="images/back-arrow.svg" class="icon-img-btn">
+                </button>
+                <p>Fine List:</p>
+                <button id="add-player-fine-view-btn" class="icon-btn">
+                    <img src="images/add.svg" class="icon-img-btn">
                 </button>
             </nav>
             
             <div class="current-player-view">
-                <p>Enter how much you want to add or subtract...</p>
-                <input id="fine-input" type="number" placeholder="Fine:">
-                <input id="fine-reason-input" type="text" placeholder="Fine Reason:">
-                <div class="submit-btns">
-                    <button id="subtract-fine-btn" class="submit-btn">Subtract</button>
-                    <button id="add-fine-btn" class="submit-btn">Add</button>
-                </div>
+
                 <ul>
-                    <div class="fine-reason">
-                        <li>Dummy Club</li>
-                        <li>£1</li>
-                    </div>
+                    <div id="fine-reasons"></div>
                 </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="add-fine-to-player-view">
+        <div class="container">
+            <div class="add-fine-inputs">
+                <input id="fine-input" type="text" onfocus="(this.type='number')" onblur="(this.type='text')" placeholder="Fine Amount:">
+                <input id="fine-reason-input" type="text" placeholder="Fine Reason:">
+                <input id="fine-team-played-against" type="text" placeholder="Team Played Against:">
+                <input id="fine-date" type="date" placeholder="Date of Game:">
+                <div class="submit-btns">
+                    <button id="add-fine-btn" class="submit-btn">Add</button>
+                    <button id="cancel-fine-btn" class="submit-btn">Cancel</button>
+                </div>
             </div>
         </div>
     </section>
